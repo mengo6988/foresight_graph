@@ -48,19 +48,6 @@ type LSLMSRMarketMakerAdminTransferred @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type PayoutRedemption @entity(immutable: true) {
-  id: Bytes!
-  redeemer: Bytes! # address
-  collateralToken: Bytes! # address
-  parentCollectionId: Bytes! # bytes32
-  conditionId: Bytes! # bytes32
-  indexSets: [BigInt!]! # uint[]
-  payout: BigInt! # uint
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
 type CollateralTransfer @entity(immutable: true) {
   id: Bytes!
   from: Bytes! # address
@@ -78,7 +65,7 @@ type MarketMaker @entity(immutable: true) {
   address: Bytes! # address
   collateralToken: Bytes! # address
   positionIds: [Bytes!]! # bytes32[]
-  resolutionOutcome: Int!
+  resolutionOutcome: Int! # -999 = unresolved, -1 = draw, 0+ = winning outcome
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
@@ -111,11 +98,18 @@ type UserPosition  @entity(immutable: false) {
   id: Bytes!
   user: Bytes! # address
   marketMaker: MarketMaker!
+  positionId: BigInt!
   outcomeIndex: Int!
-  transactionType: TransactionType!
-  collateralAmount: BigInt!
-  outcomeTokenAmounts: BigInt!
-  investedAmount: BigInt!
-  realizedProfit: Int8!
-  blockTimestamp: BigInt!
+  # Cost-basis cumulative tracking
+  totalShares: BigInt!           # Token counts
+  totalInvested: BigInt!    # Dollar amounts
+  realizedPnL: BigInt!      # Profit/loss
+  avgCost: BigDecimal!          # Average cost per share
+  lastUpdatedAt: BigInt!
+
+  # Legacy fields (optional for backward compatibility)
+  transactionType: TransactionType
+  collateralAmount: BigInt   # Trade amounts
+  outcomeTokenAmounts: BigInt    # Token counts
+  investedAmount: BigDecimal    # Dollar amounts
 }

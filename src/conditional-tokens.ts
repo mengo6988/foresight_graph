@@ -1,25 +1,12 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { PayoutRedemption as PayoutRedemptionEvent } from "../generated/ConditionalTokens/ConditionalTokens"
-import { PayoutRedemption, CollateralTransfer, UserTransaction, ConditionToMarketMaker, MarketMaker } from "../generated/schema"
+import {
+  PayoutRedemption as PayoutRedemptionEvent,
+  ConditionResolution as ConditionResolutionEvent
+} from "../generated/ConditionalTokens/ConditionalTokens"
+import { CollateralTransfer, UserTransaction, ConditionToMarketMaker, MarketMaker } from "../generated/schema"
 
 export function payoutRedemption(event: PayoutRedemptionEvent): void {
-  let entity = new PayoutRedemption(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-
-  entity.redeemer = event.params.redeemer
-  entity.collateralToken = event.params.collateralToken
-  entity.parentCollectionId = event.params.parentCollectionId
-  entity.conditionId = event.params.conditionId
-  entity.indexSets = event.params.indexSets
-  entity.payout = event.params.payout
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-
-  // Also track this as a collateral transfer
+  // Track this as a collateral transfer
   let transferEntity = new CollateralTransfer(
     event.transaction.hash.concatI32(event.logIndex.toI32()).concat(Bytes.fromI32(1))
   )
@@ -54,7 +41,7 @@ export function payoutRedemption(event: PayoutRedemptionEvent): void {
       mm.address = event.address
       mm.collateralToken = event.params.collateralToken
       mm.positionIds = []
-      mm.resolutionOutcome = -1
+      mm.resolutionOutcome = -999 // -999 = unresolved
       mm.blockTimestamp = event.block.timestamp
       mm.transactionHash = event.transaction.hash
       mm.save()
@@ -70,4 +57,41 @@ export function payoutRedemption(event: PayoutRedemptionEvent): void {
   userTx.blockTimestamp = event.block.timestamp
   userTx.txHash = event.transaction.hash
   userTx.save()
+}
+
+export function handleConditionResolution(event: ConditionResolutionEvent): void {
+  // Find the MarketMaker associated with this conditionId
+  let mapping = ConditionToMarketMaker.load(event.params.conditionId)
+  if (mapping == null) {
+    return // No associated market maker found
+  }
+
+  let marketMaker = MarketMaker.load(mapping.marketMaker)
+  if (marketMaker == null) {
+    return // Market maker not found
+  }
+
+  // Determine the resolution outcome from the payoutNumerators array
+  // If all payouts are 0, it's a draw (-1)
+  // Otherwise, find the index with non-zero payout (winning outcome)
+  let payoutNumerators = event.params.payoutNumerators
+  let hasNonZeroPayout = false
+  let winningOutcome = -1
+
+  for (let i = 0; i < payoutNumerators.length; i++) {
+    if (payoutNumerators[i].gt(BigInt.zero())) {
+      hasNonZeroPayout = true
+      winningOutcome = i
+      break
+    }
+  }
+
+  // Set resolution outcome: null = unresolved, -1 = draw, 0+ = winning outcome
+  if (!hasNonZeroPayout) {
+    marketMaker.resolutionOutcome = -1 // Draw
+  } else {
+    marketMaker.resolutionOutcome = winningOutcome
+  }
+
+  marketMaker.save()
 }

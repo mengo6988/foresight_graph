@@ -122,8 +122,8 @@ export function handleLSLMSRMarketMakerCreation(
   marketMaker.address = event.params.lmsrMarketMaker
   marketMaker.collateralToken = event.params.collateralToken
   marketMaker.positionIds = []
-  // Use -1 to denote unresolved/unknown at creation
-  marketMaker.resolutionOutcome = -1
+  // Use -999 to denote unresolved/unknown at creation (null equivalent)
+  marketMaker.resolutionOutcome = -999
   marketMaker.blockTimestamp = event.block.timestamp
   marketMaker.transactionHash = event.transaction.hash
   marketMaker.save()

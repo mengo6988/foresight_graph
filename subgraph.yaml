@@ -39,7 +39,6 @@ dataSources:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - PayoutRedemption
         - UserTransaction
       abis:
         - name: ConditionalTokens
@@ -47,6 +46,8 @@ dataSources:
       eventHandlers:
         - event: PayoutRedemption(indexed address,indexed address,indexed bytes32,bytes32,uint256[],uint256)
           handler: payoutRedemption
+        - event: ConditionResolution(indexed bytes32,indexed address,indexed bytes32,uint256,uint256[])
+          handler: handleConditionResolution
       file: ./src/conditional-tokens.ts
 templates:
   - kind: ethereum
@@ -62,6 +63,7 @@ templates:
         - LSLMSRMarketMakerAMMCreated
         - AMMOutcomeTokenTrade
         - UserTransaction
+        - UserPosition
       abis:
         - name: LSLMSRMarketMaker
           file: ./abis/LSLMSRMarketMaker.json
