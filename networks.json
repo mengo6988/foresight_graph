@@ -3,6 +3,9 @@
     "LSLMSRMarketMakerFactory": {
       "address": "0x116c88761fBC321c4a6aF1Da6803DA445479817c",
       "startBlock": 17811068
+    },
+    "LSLMSRMarketMaker": {
+      "address": "0xEE45865796e05c8942EA8B7c5f3A97D8fa02Fb7F"
     }
   }
 }

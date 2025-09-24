@@ -3,3 +3,119 @@ type ExampleEntity @entity(immutable: true) {
   count: BigInt!
   initialFunding: BigInt! # uint256
 }
+
+type LSLMSRMarketMakerCreation @entity(immutable: true) {
+  id: Bytes!
+  creator: Bytes! # address
+  lmsrMarketMaker: Bytes! # address
+  pmSystem: Bytes! # address
+  collateralToken: Bytes! # address
+  conditionIds: [Bytes!]! # bytes32[]
+  fee: BigInt! # uint64
+  funding: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LSLMSRMarketMakerAMMCreated @entity(immutable: true) {
+  id: Bytes!
+  initialFunding: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AMMOutcomeTokenTrade @entity(immutable: true) {
+  id: Bytes!
+  transactor: Bytes! # address
+  outcomeTokenAmounts: [BigInt!]! # int256[]
+  outcomeTokenNetCost: BigInt! # int256
+  marketFees: BigInt! # uint256
+  collateralToken: Bytes! # address - NEW: track which token was used
+  collateralAmount: BigInt! # uint256 - NEW: track collateral amount
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type LSLMSRMarketMakerAdminTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousAdmin: Bytes! # address
+  newAdmin: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PayoutRedemption @entity(immutable: true) {
+  id: Bytes!
+  redeemer: Bytes! # address
+  collateralToken: Bytes! # address
+  parentCollectionId: Bytes! # bytes32
+  conditionId: Bytes! # bytes32
+  indexSets: [BigInt!]! # uint[]
+  payout: BigInt! # uint
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CollateralTransfer @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  value: BigInt! # uint256
+  token: Bytes! # address
+  relatedContract: Bytes! # address (market maker or conditional tokens)
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MarketMaker @entity(immutable: true) {
+  id: Bytes!
+  address: Bytes! # address
+  collateralToken: Bytes! # address
+  positionIds: [Bytes!]! # bytes32[]
+  resolutionOutcome: Int!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+# Mapping helper to resolve a conditionId to its MarketMaker
+type ConditionToMarketMaker @entity(immutable: true) {
+  id: Bytes! # conditionId
+  conditionId: Bytes!
+  marketMaker: MarketMaker!
+}
+
+enum TransactionType {
+  Buy
+  Sell
+  Redeem
+}
+
+type UserTransaction @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  marketMaker: MarketMaker!
+  transactionType: TransactionType!
+  collateralAmount: BigInt! # uint256
+  outcomeTokenAmounts: BigInt! # int256
+  blockTimestamp: BigInt!
+  txHash: Bytes!
+}
+
+type UserPosition  @entity(immutable: false) {
+  id: Bytes!
+  user: Bytes! # address
+  marketMaker: MarketMaker!
+  outcomeIndex: Int!
+  transactionType: TransactionType!
+  collateralAmount: BigInt!
+  outcomeTokenAmounts: BigInt!
+  investedAmount: BigInt!
+  realizedProfit: Int8!
+  blockTimestamp: BigInt!
+}

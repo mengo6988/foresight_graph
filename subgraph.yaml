@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum
     name: LSLMSRMarketMakerFactory
-    network: katana-tatara
+    network: tatara
     source:
       address: "0x116c88761fBC321c4a6aF1Da6803DA445479817c"
       abi: LSLMSRMarketMakerFactory
@@ -16,29 +16,58 @@ dataSources:
       apiVersion: 0.0.9
       language: wasm/assemblyscript
       entities:
-        - AMMCreated
-        - AdminTransferred
-        - CloneCreated
         - LSLMSRMarketMakerCreation
-        - RoleAdminChanged
-        - RoleGranted
-        - RoleRevoked
+        - MarketMaker
+        - ConditionToMarketMaker
       abis:
         - name: LSLMSRMarketMakerFactory
           file: ./abis/LSLMSRMarketMakerFactory.json
       eventHandlers:
+        - event: LSLMSRMarketMakerCreation(indexed
+            address,address,address,address,bytes32[],uint64,uint256)
+          handler: handleLSLMSRMarketMakerCreation
+      file: ./src/lslmsr-market-maker-factory.ts
+  - kind: ethereum
+    name: ConditionalTokens
+    network: tatara
+    source:
+      address: "0xc3A7b5B049E2ae282d2325e4C000a61581395636"
+      abi: ConditionalTokens
+      startBlock: 18450067
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - PayoutRedemption
+        - UserTransaction
+      abis:
+        - name: ConditionalTokens
+          file: ./abis/ConditionalTokens.json
+      eventHandlers:
+        - event: PayoutRedemption(indexed address,indexed address,indexed bytes32,bytes32,uint256[],uint256)
+          handler: payoutRedemption
+      file: ./src/conditional-tokens.ts
+templates:
+  - kind: ethereum
+    name: LSLMSRMarketMaker
+    network: tatara
+    source:
+      abi: LSLMSRMarketMaker
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - LSLMSRMarketMakerAMMCreated
+        - AMMOutcomeTokenTrade
+        - UserTransaction
+      abis:
+        - name: LSLMSRMarketMaker
+          file: ./abis/LSLMSRMarketMaker.json
+      eventHandlers:
         - event: AMMCreated(uint256)
           handler: handleAMMCreated
-        - event: AdminTransferred(indexed address,indexed address)
-          handler: handleAdminTransferred
-        - event: CloneCreated(indexed address,address)
-          handler: handleCloneCreated
-        - event: LSLMSRMarketMakerCreation(indexed address,address,address,address,bytes32[],uint64,uint256)
-          handler: handleLSLMSRMarketMakerCreation
-        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
-          handler: handleRoleAdminChanged
-        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleGranted
-        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleRevoked
-      file: ./src/lslmsr-market-maker-factory.ts
+        - event: AMMOutcomeTokenTrade(indexed address,int256[],int256,uint256)
+          handler: handleAMMOutcomeTokenTrade
+      file: ./src/lslmsr-market-maker.ts
