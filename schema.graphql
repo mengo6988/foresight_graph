@@ -60,7 +60,7 @@ type CollateralTransfer @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type MarketMaker @entity(immutable: true) {
+type MarketMaker @entity(immutable: false) {
   id: Bytes!
   address: Bytes! # address
   collateralToken: Bytes! # address
@@ -106,10 +106,4 @@ type UserPosition  @entity(immutable: false) {
   realizedPnL: BigInt!      # Profit/loss
   avgCost: BigDecimal!          # Average cost per share
   lastUpdatedAt: BigInt!
-
-  # Legacy fields (optional for backward compatibility)
-  transactionType: TransactionType
-  collateralAmount: BigInt   # Trade amounts
-  outcomeTokenAmounts: BigInt    # Token counts
-  investedAmount: BigDecimal    # Dollar amounts
 }

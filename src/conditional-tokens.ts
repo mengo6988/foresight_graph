@@ -72,25 +72,24 @@ export function handleConditionResolution(event: ConditionResolutionEvent): void
   }
 
   // Determine the resolution outcome from the payoutNumerators array
-  // If all payouts are 0, it's a draw (-1)
-  // Otherwise, find the index with non-zero payout (winning outcome)
+  // If both payouts are equal, it's a draw (-1)
+  // If [1, 0] then index 0 won, if [0, 1] then index 1 won
   let payoutNumerators = event.params.payoutNumerators
-  let hasNonZeroPayout = false
-  let winningOutcome = -1
 
-  for (let i = 0; i < payoutNumerators.length; i++) {
-    if (payoutNumerators[i].gt(BigInt.zero())) {
-      hasNonZeroPayout = true
-      winningOutcome = i
-      break
-    }
+  if (payoutNumerators.length < 2) {
+    return // Invalid payout structure
   }
 
-  // Set resolution outcome: null = unresolved, -1 = draw, 0+ = winning outcome
-  if (!hasNonZeroPayout) {
+  let payout0 = payoutNumerators[0]
+  let payout1 = payoutNumerators[1]
+
+  // Check if both payouts are equal (draw)
+  if (payout0.equals(payout1)) {
     marketMaker.resolutionOutcome = -1 // Draw
+  } else if (payout0.gt(payout1)) {
+    marketMaker.resolutionOutcome = 0 // Index 0 won
   } else {
-    marketMaker.resolutionOutcome = winningOutcome
+    marketMaker.resolutionOutcome = 1 // Index 1 won
   }
 
   marketMaker.save()

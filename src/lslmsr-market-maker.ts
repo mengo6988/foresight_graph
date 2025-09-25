@@ -132,9 +132,14 @@ export function handleAMMOutcomeTokenTrade(event: AMMOutcomeTokenTradeEvent): vo
     if (tokensSold.gt(userPosition.totalShares)) {
       tokensSold = userPosition.totalShares
     }
-    // For sell: calculate cost basis using integer math (since values are already scaled)
-    // avgCost is BigDecimal, but we'll work with scaled integers
-    let costBasisValue = userPosition.totalInvested.times(tokensSold).div(userPosition.totalShares)
+    // Calculate cost basis using avgCost (matches SQL logic exactly)
+    // avgCost * tokensSold = cost basis for the sold tokens
+    let costBasisValue = BigInt.zero()
+    if (!userPosition.totalShares.equals(BigInt.zero()) && !tokensSold.equals(BigInt.zero())) {
+      // Use BigDecimal for precision: avgCost * tokensSold
+      let costBasisDecimal = userPosition.avgCost.times(tokensSold.toBigDecimal())
+      costBasisValue = costBasisDecimal.truncate(0).digits
+    }
     let proceeds = absNetCost
     let pnl = proceeds.minus(costBasisValue)
 
@@ -147,11 +152,11 @@ export function handleAMMOutcomeTokenTrade(event: AMMOutcomeTokenTradeEvent): vo
       userPosition.totalInvested = BigInt.zero()
     }
 
-    if (!userPosition.totalShares.equals(BigInt.zero())) {
-      userPosition.avgCost = userPosition.totalInvested.toBigDecimal().div(userPosition.totalShares.toBigDecimal())
-    } else {
-      userPosition.avgCost = BigDecimal.zero()
-    }
+    // if (!userPosition.totalShares.equals(BigInt.zero())) {
+    //   userPosition.avgCost = userPosition.totalInvested.toBigDecimal().div(userPosition.totalShares.toBigDecimal())
+    // } else {
+    //   userPosition.avgCost = BigDecimal.zero()
+    // }
   }
 
   userPosition.lastUpdatedAt = event.block.timestamp

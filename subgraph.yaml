@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: LSLMSRMarketMakerFactory
-    network: tatara
+    network: katana
     source:
-      address: "0x116c88761fBC321c4a6aF1Da6803DA445479817c"
+      address: "0xBeAF2d2f336429c6EEE9bd9a9317CcE1e3Ef4874"
       abi: LSLMSRMarketMakerFactory
-      startBlock: 17811068
+      startBlock: 10344337 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -29,11 +29,11 @@ dataSources:
       file: ./src/lslmsr-market-maker-factory.ts
   - kind: ethereum
     name: ConditionalTokens
-    network: tatara
+    network: katana
     source:
-      address: "0xc3A7b5B049E2ae282d2325e4C000a61581395636"
+      address: "0x7fA0De623B0FE365C157aCA6caB38361E8757859"
       abi: ConditionalTokens
-      startBlock: 18450067
+      startBlock: 10344338 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -52,7 +52,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: LSLMSRMarketMaker
-    network: tatara
+    network: katana
     source:
       abi: LSLMSRMarketMaker
     mapping:
