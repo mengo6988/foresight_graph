@@ -3,7 +3,7 @@ import {
   AMMOutcomeTokenTrade as AMMOutcomeTokenTradeEvent,
   AdminTransferred as AdminTransferredEvent,
   LSLMSRMarketMaker,
-} from "../generated/LSLMSRMarketMaker/LSLMSRMarketMaker"
+} from "../generated/templates/LSLMSRMarketMaker/LSLMSRMarketMaker"
 import { BigInt, Bytes, ByteArray, BigDecimal } from "@graphprotocol/graph-ts"
 import {
   LSLMSRMarketMakerAMMCreated,
